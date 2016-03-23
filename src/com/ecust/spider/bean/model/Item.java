@@ -3,42 +3,40 @@ package com.ecust.spider.bean.model;
 import java.util.ArrayList;
 
 public class Item {
-	private String name; 			//商品名称
-	private String host;			//商品来源
-	private String id;					//商品ID
-	private String price;			//商品价格
-	private ArrayList<String> catgory;	//商品完整分类结构（从大到小）
-	private String url;				//链接地址
-	private String imageUrl;		//图片链接
-	private String description;		//商品描述
-	private String catFirst;		//商品第一级分类（大）
-	private String catSecond;		//商品第二季分类（中）
-	private String catThird;		//商品第二季分类（小）
-	private String brand = "";			//品牌
+	protected String name; 			//商品名称
+	protected String host;			//商品来源
+//	protected String id;					//商品ID
+	protected String price;			//商品价格
+	protected ArrayList<String> catgory;	//商品完整分类结构（从大到小）
+	protected String url;				//链接地址
+	protected String imageUrl;		//图片链接
+	protected String description;		//商品描述
+	protected String catFirst;		//商品第一级分类（大）
+	protected String catSecond;		//商品第二季分类（中）
+	protected String catThird;		//商品第二季分类（小）
+	protected String brand = "";			//品牌
 	
 	public Item(){					//空构造器
 		
 	}
 	
-	public Item(String name,String host,String id,String price,	//完整构造器
+	public Item(String name,String host,String price,	//完整构造器
 			ArrayList<String> catgory,String url,String imageUrl,String description){
 		setName(removeQuo(name));
 		setHost(host);
-		setId(id);
 		setPrice(price);
 		setUrl(url);
 		setImageUrl(imageUrl);
 		setDescription(removeQuo(description));
-		for(int i = 0;i<catgory.size();i++){
-			catgory.set(i, removeQuo(catgory.get(i)));
-		}
+//		for(int i = 0;i<catgory.size();i++){
+//			catgory.set(i, catgory.get(i));
+//		}
 		adaptCatgory(catgory);
 	}
 	
 	@Override
 	public String toString(){		//获取商品信息
 		return new String("该商品："+"名称="+name+" "+
-				"ID="+id+" "+
 				"来源="+host+" "+
 				"价格="+price+" "+
 				"分类="+catgory+" "+
@@ -70,14 +68,14 @@ public class Item {
 			setCatFirst(Catgory.get(0));
 			setCatSecond(Catgory.get(1));
 			setCatThird(Catgory.get(2));
-			setBrand(Catgory.get(Catgory.size()-1));
 			break;
 		}
+		setBrand(Catgory.get(Catgory.size()-1));
 	}
 
-	private String removeQuo(String str){
+	protected String removeQuo(String str){
 		String rep = new String (str);
-		rep = rep.replace("'", "''");
+		rep = rep.replace("'", "’");
 		return rep;
 	}
 	
@@ -92,12 +90,6 @@ public class Item {
 	}
 	public void setHost(String host) {
 		this.host = host;
-	}
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
 	}
 	public String getPrice() {
 		return price;
@@ -164,6 +156,6 @@ public class Item {
 	}
 
 	public void setBrand(String brand) {
-		this.brand = brand;
+		this.brand = removeQuo(brand);
 	}
 }

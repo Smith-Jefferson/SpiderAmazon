@@ -1,6 +1,7 @@
 package com.ecust.spider.util;
 
 import com.ecust.spider.api.ListFetcher;
+import com.ecust.spider.fetcher.listFetcher.AmazonListFetcher;
 import com.ecust.spider.fetcher.listFetcher.JDListFetcher;
 import com.ecust.spider.fetcher.listFetcher.SNListFetcher;
 import com.ecust.spider.fetcher.listFetcher.YHDListFetcher;
@@ -12,6 +13,7 @@ public class ListFetcherFactory {
 	public static final String SN = "suning";
 
 	public static ListFetcher getListFetcher(String oneListUrl) {
+		System.out.println(oneListUrl);
 		if (oneListUrl.contains(JD)) {
 			return new JDListFetcher();
 		} else if (oneListUrl.contains(YHD)) {
@@ -19,9 +21,9 @@ public class ListFetcherFactory {
 		} else if (oneListUrl.contains(SN)) {
 			return new SNListFetcher();
 		} else {
-			System.out.println("暂时还无法处理的网站");
+			return new AmazonListFetcher();
 		}
-		return null;
+	//	return null;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -48,27 +49,64 @@ public class JsoupUtil {
 		}
 		return mQueue;
 	}
+	protected static Document Getdoc(String oneListUrl, int tryTime) {
+		int mTryTime = --tryTime;
+
+		Document doc = null;
+		Connection conn = null;
+		try {
+			// 获取item页，总共有多少页
+			conn = Jsoup.connect(oneListUrl);
+			conn.header(
+					"User-Agent",
+					"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2 Googlebot/2.1");
+
+			doc = conn.timeout(200 * 1000).get();// 如果页面没有抓全，重新抓取
+			if (doc == null && tryTime >= 0) {
+				System.out.println("解析list：" + oneListUrl + "的 DOC 时出错！剩余尝试次数："
+						+ tryTime);
+				return Getdoc(oneListUrl, mTryTime);
+			} else if (doc == null) {
+				System.out.println("解析list：" + oneListUrl + "的 DOC 时出错！");
+			}
+		} catch (Exception e) {
+			if (tryTime >= 0) {
+				System.out.println("解析list：" + oneListUrl + "的时出错！剩余尝试次数："
+						+ tryTime);
+				return Getdoc(oneListUrl, mTryTime);
+			} else {
+				System.out.println("解析list：" + oneListUrl + "时出错！");
+				return null;
+				//e.printStackTrace();
+			}
+		}
+		return doc;
+	}
 
 	public static HashSet<String> praseArray(String url) {
-		if (url.equals(Constants.YHD_MAP_URL)) {
-			return praseYHDArray(url);
-		}else if (url.equals(Constants.SN_MAP_URL)) {
-			return praseSNArray(url);
-		}
-		
+//		if (url.equals(Constants.YHD_MAP_URL)) {
+//			return praseYHDArray(url);
+//		}else if (url.equals(Constants.SN_MAP_URL)) {
+//			return praseSNArray(url);
+//		}
+//		
 		HashSet<String> mQueue = new HashSet<String>();
-		try {
-			Document doc = Jsoup.connect(url).get();
-			Elements lists = doc.getElementsByClass("mc");
-			Elements links = lists.select("a[href]");
-			for (Element link : links) {
-				if (ListFilter.UrlJudge(link.attr("abs:href"), ListFilter.LIST)) {
-					mQueue.add(link.attr("abs:href"));
-				}
+		Document doc = Getdoc(url,3);
+		String[] containClass={"div#container","div.a-container","div.fsdContainer","div.fsdDeptBox","div.bxc-grid__container","div.acs-tiles-wrap","div.unified_widget"};
+		Elements lists = null;
+		for(String str:containClass){
+			lists = doc.select(str);
+			if(!lists.isEmpty())
+				break;
+		}
+		Elements links = lists.select("a[href]");
+		if(links.isEmpty()){
+			links = doc.select("a.a-link-normal").select("a[href]");
+		}
+		for (Element link : links) {
+			if (ListFilter.UrlJudge(link.attr("abs:href"), ListFilter.LIST)) {
+				mQueue.add(link.attr("abs:href"));
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return mQueue;
 	}

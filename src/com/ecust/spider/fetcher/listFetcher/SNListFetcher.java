@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jsoup.nodes.Element;
+
 import com.ecust.spider.Constants;
 import com.ecust.spider.api.ListFetcher;
 
@@ -66,6 +68,12 @@ public class SNListFetcher extends ListFetcher {
 		}
 		
 		return nextPageUrl;
+	}
+
+	@Override
+	public int GetMaxNum(Element doc) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

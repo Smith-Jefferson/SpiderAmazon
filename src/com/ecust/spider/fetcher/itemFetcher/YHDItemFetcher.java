@@ -115,4 +115,58 @@ public class YHDItemFetcher extends ItemFetcher {
 		return categoryList;
 	}
 
+	@Override
+	public String getItemDescription(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getItemReviews(Element doc) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getItemAnswered(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getItemSeller(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getItemSale(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getItemsave(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getItemShipping(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getItemStock(Element doc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public float getItemStar(Element doc) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

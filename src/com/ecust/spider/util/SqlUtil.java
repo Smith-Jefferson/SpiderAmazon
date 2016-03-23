@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import com.ecust.spider.Value;
+import com.ecust.spider.bean.model.AmazonItem;
 import com.ecust.spider.bean.model.Item;
 
 public class SqlUtil {
@@ -21,10 +22,8 @@ public class SqlUtil {
 		setPassword(password);
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://localhost:3306/" + dbName + "?user="
-					+ userName + "&password=" + password
-					+ "&useUnicode=true&characterEncoding=utf-8";
-			Connection conn = DriverManager.getConnection(url);
+			String url = "jdbc:mysql://175.185.8.9:3306/" + dbName;
+			Connection conn = DriverManager.getConnection(url, userName, password);
 			stmt = conn.createStatement();
 		} catch (Exception e) {
 			System.out.println("链接数据库出错！");
@@ -35,13 +34,39 @@ public class SqlUtil {
 	public void addItem(Item item, String table) {
 		String sql = "INSERT INTO "
 				+ table
-				+ "(Iname,Iid,Ibrand,Ihost,Iprice,Ifirst_cat,Isecond_cat,Ithird_cat,Iurl,Iimg_url,Idescription)"
-				+ " VALUES('" + item.getName() + "','" + item.getId() + "','"
+				+ "(Iname,Ibrand,Ihost,Iprice,Ifirst_cat,Isecond_cat,Ithird_cat,Iurl,Iimg_url,Idescription)"
+				+ " VALUES('" + item.getName() + "','"
 				+ item.getBrand() + "','" + item.getHost() + "','"
 				+ item.getPrice() + "','" + item.getCatFirst() + "','"
 				+ item.getCatSecond() + "','" + item.getCatThird() + "','"
 				+ item.getUrl() + "','" + item.getImageUrl() + "','"
 				+ item.getDescription() + "')";
+		try {
+			stmt.executeQuery(sql);
+			System.out.println(++Value.count +" "+item.getCatgory()+"\t"+item.getName() + "已写入数据库"+"\t"+Value.doneNum+"/"+Value.totleNum+"\t"+Value.errNum);
+			if (Value.getDbState()) {
+				Value.setDbState(false);
+			}
+		} catch (Exception e) {
+			System.out.println("写入数据库出错！");
+			e.printStackTrace();
+		}
+	}
+	public void addAmazonItem(AmazonItem item, String table) {
+		String sql = "INSERT INTO "
+				+ table
+				+ "(Iname,Ibrand,Ihost,Iprice,Ifirst_cat,Isecond_cat,Ithird_cat,Iurl,Iimg_url,Idescription,save,"
+				+ "reviews,answered,seller,sale,shipping,stock,shipper,detail,star)"
+				+ " VALUES('" + item.getName() + "','" 
+				+ item.getBrand() + "','" + item.getHost() + "','"
+				+ item.getPrice() + "','" + item.getCatFirst() + "','"
+				+ item.getCatSecond() + "','" + item.getCatThird() + "','"
+				+ item.getUrl() + "','" + item.getImageUrl() + "','"
+				+ item.getDescription() + "','"+ item.getSave() + "','"
+				+ item.getReviews()+ "','" + item.getAnswered() + "','"
+				+ item.getSeller()+ "','" + item.getSale() + "','"
+				+ item.getShipping()+ "','" + item.getStock() + "','"
+				+ item.getShipper()+ "','"  + item.getDetail()+ "','" + item.getStar() + "')";
 		try {
 			stmt.execute(sql);
 			System.out.println(++Value.count +" "+item.getCatgory()+"\t"+item.getName() + "已写入数据库"+"\t"+Value.doneNum+"/"+Value.totleNum+"\t"+Value.errNum);
@@ -53,7 +78,6 @@ public class SqlUtil {
 			e.printStackTrace();
 		}
 	}
-
 	public void getAll(String table) {
 		String sql = new String("select * from " + table);
 		try {

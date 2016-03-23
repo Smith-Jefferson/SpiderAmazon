@@ -14,6 +14,7 @@ import org.jsoup.select.Elements;
 
 import com.ecust.spider.Constants;
 import com.ecust.spider.Value;
+import com.ecust.spider.bean.model.AmazonItem;
 import com.ecust.spider.bean.model.Item;
 import com.ecust.spider.util.BloomFilter;
 import com.ecust.spider.util.ItemFetcherFactory;
@@ -26,25 +27,20 @@ public abstract class ListFetcher {
 
 	public abstract String GetNextPage(String nextPageUrl, String page,
 			int currentI);
+	public abstract int GetMaxNum(Element doc);
 
 	protected void excuteGeneralList(String oneListUrl, String[] Listclass,
 			Map<String, String> pageClass, int type, int length) {
 		switch (type) {
-		case Constants.JD:
-			table = Constants.JD_TABLE;
-			break;
-		case Constants.YHD:
-			table = Constants.YHD_TABLE;
-			break;
-		case Constants.SN:
-			table = Constants.SN_TABLE;
+		case Constants.Amazon:
+			table = Constants.Amazon_TABLE;
 			break;
 		default:
 			break;
 		}
 		try {
 			Document doc = Getdoc(oneListUrl, MAX_TRY);
-			String[] removeString = { "页", ".", "确定" };
+			String[] removeString = { "Previous Page", ".", "Next Page" };
 			// 得到当前页面的ItemList
 			HashSet<String> itemList = new HashSet<String>();
 			try {
@@ -62,64 +58,74 @@ public abstract class ListFetcher {
 			String page = "";
 			String nextPage = "";
 			try {
-				HashMap<Element, String> nextMap = GetMaxpageUrl(doc,
-						pageClass, removeString);
-				Urlend = Integer.parseInt(nextMap.entrySet().iterator().next()
-						.getKey().text().trim());
-				page = nextMap.entrySet().iterator().next().getValue();
-				nextPage = nextMap.entrySet().iterator().next().getKey()
-						.absUrl("href");
+				if(!pageClass.isEmpty()){
+					HashMap<Element, String> nextMap = GetMaxpageUrl(doc,
+							pageClass, removeString);
+					Urlend = Integer.parseInt(nextMap.entrySet().iterator().next()
+							.getKey().text().trim());
+					int urlmax=GetMaxNum(doc);
+					if(Urlend<urlmax)
+						Urlend=urlmax;
+					page = nextMap.entrySet().iterator().next().getValue();
+					nextPage = nextMap.entrySet().iterator().next().getKey()
+							.absUrl("href");
+				}
+				
 			} catch (Exception e) {
 				// TODO: handle exception
 				System.out.println("当前页不存在分页" + oneListUrl);
 			}
 
 			// 循环获取当前页所包含的item地址，获得详情后写入数据库
-			for (int currentI = 2; currentI <= Urlend; currentI++) {
-				// 调用处理item详情页面的方法
-				for (Iterator<String> itemurl = itemList.iterator(); itemurl
-						.hasNext();) {
-					String url = itemurl.next();
-					if (!BloomFilter.ifNotContainsSet(url)
-							&& url.length() > length) {
-						// System.out.println(url);
-						Item item = ItemFetcherFactory.getItemFetcher(type)
-								.getItemInfo(url);
-						if (item == null) {
-							continue;
-						}
-						try {
-							if (Value.getmSqlUtil() != null) {
-								Value.getmSqlUtil().addItem(item, table);
-							} else {
-								System.out.print("获取数据库实例失败！");
+			if(Urlend>=2){
+				for (int currentI = 2; currentI <= Urlend; currentI++) {
+					// 调用处理item详情页面的方法
+					for (Iterator<String> itemurl = itemList.iterator(); itemurl
+							.hasNext();) {
+						String url = itemurl.next();
+						if (!BloomFilter.ifNotContainsSet(url)
+								&& url.length() > length) {
+							// System.out.println(url);
+							Item item = ItemFetcherFactory.getItemFetcher(type)
+									.getItemInfo(url);
+							if (item == null) {
+								continue;
 							}
-						} catch (Exception e) {
-							// TODO: handle exception
-							System.out.println("获取item失败");
-							e.printStackTrace();
+							try {
+								if (Value.getmSqlUtil() != null) {
+									Value.getmSqlUtil().addAmazonItem((AmazonItem) item, table);
+								} else {
+									System.out.print("获取数据库实例失败！");
+								}
+							} catch (Exception e) {
+								// TODO: handle exception
+								System.out.println("获取item失败");
+								e.printStackTrace();
+							}
+
 						}
 
 					}
+					itemList.clear();
+					
+					try {
+						nextPage = GetNextPage(nextPage, page, currentI);
+					} catch (Exception e) {
+						// TODO: handle exception
+						System.out.println("获取分页失败");
+						e.printStackTrace();
+					}
+					try {
+						itemList = GetItemList(nextPage, null, Listclass);
+					} catch (Exception e) {
+						// TODO: handle exception
+						System.out.println("获取当前网页" + oneListUrl + "的item列表失败");
+						e.printStackTrace();
+					}
 
 				}
-				itemList.clear();
-				try {
-					nextPage = GetNextPage(nextPage, page, currentI);
-				} catch (Exception e) {
-					// TODO: handle exception
-					System.out.println("获取分页失败");
-					e.printStackTrace();
-				}
-				try {
-					itemList = GetItemList(nextPage, null, Listclass);
-				} catch (Exception e) {
-					// TODO: handle exception
-					System.out.println("获取当前网页" + oneListUrl + "的item列表失败");
-					e.printStackTrace();
-				}
-
 			}
+			
 
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -158,7 +164,7 @@ public abstract class ListFetcher {
 		return nextMap;
 	}
 
-	protected Document Getdoc(String oneListUrl, int tryTime) {
+	public Document Getdoc(String oneListUrl, int tryTime) {
 		int mTryTime = --tryTime;
 
 		Document doc = null;
@@ -197,10 +203,14 @@ public abstract class ListFetcher {
 		try {
 			Document doc = null;
 			if (document == null) {
-				doc = Getdoc(url, MAX_TRY);
+				if(!url.isEmpty())
+					doc = Getdoc(url, MAX_TRY);
+				else
+					return null;
 			} else {
 				doc = document;
 			}
+			//System.out.println(doc.toString());
 			Elements links = null;
 			for (int j = 0; j < classString.length; j++) {
 				try {
@@ -211,25 +221,29 @@ public abstract class ListFetcher {
 						} else {
 							links = links.select(sep[temp]);
 						}
+						if (links != null && !links.isEmpty()) {
+							break;
+						}
 					}
 					links = links.select("a[href]");
 				} catch (Exception e) {
 					System.out.println("我也不知道发生了什么神奇的错误...");
 					e.printStackTrace();
 				}
-				if (links != null && !links.isEmpty()) {
-					break;
-				}
+				
 			}
 			if (links == null || links.isEmpty()) {
 				links = doc.select("a[href]");
 				System.out.println("当前页面" + url + "获取不全");
 			}
-			for (Element link : links) {
-				if (ListFilter.UrlJudge(link.attr("abs:href"),
-						ListFilter.product) ||ListFilter.UrlJudge(link.attr("abs:href"),
-								ListFilter.ITEM)) {
-					Itemlist.add(link.attr("abs:href"));
+			else{
+				for (Element link : links) {
+					String shref=link.attr("abs:href");
+					if (ListFilter.UrlJudge(shref,
+							ListFilter.product) ||ListFilter.UrlJudge(shref,
+									ListFilter.ITEM)) {
+						Itemlist.add(shref);
+					}
 				}
 			}
 			// System.out.println(Itemlist.toString());

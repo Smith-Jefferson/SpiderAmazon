@@ -2,12 +2,13 @@ package com.ecust.spider.api;
 
 import java.util.ArrayList;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.ecust.spider.Value;
-import com.ecust.spider.bean.model.Item;
+import com.ecust.spider.bean.model.*;
 
 public abstract class ItemFetcher {
 	protected final static int MAX_TRY = 3;
@@ -19,14 +20,22 @@ public abstract class ItemFetcher {
 	protected Item getGeneralItemInfo(String host,String url, int tryTime){
 		tryTime--;
 		Document doc;
-		Item currentItem=new Item();
+		Item currentItem=new AmazonItem();
 		String itemID;
+		Connection conn = null;
 		try 
-		{		
-            doc = Jsoup.connect(url).get();
+		{	
+			conn = Jsoup.connect(url);
+			conn.header(
+					"User-Agent",
+					"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2 Googlebot/2.1");
+
+			doc = conn.timeout(200 * 1000).get();// 如果页面没有抓全，重新抓取
             itemID=getItemID(doc);
-            currentItem = new Item(getItemName(doc),host,itemID,getItemPrice(itemID),
-            		getItemCategory(doc),url,getItemImageUrl(doc),getItemDetail(doc)
+            currentItem = new AmazonItem(getItemName(doc),host,getItemPrice(itemID,doc),
+            		getItemCategory(doc),url,getItemImageUrl(doc),getItemDescription(doc),getItemDetail(doc),
+            		getItemReviews(doc),getItemAnswered(doc),getItemSeller(doc),getItemSale(doc),
+            		getItemsave(doc),getItemStar(doc),getItemShipping(doc),getItemStock(doc),getItemShipper(doc)
     				);
             
 		}
@@ -59,4 +68,22 @@ public abstract class ItemFetcher {
 	public	abstract ArrayList<String> getItemCategory(Element doc);
 	
 	public	abstract String getItemDetail(Element doc);
+	public	abstract String getItemDescription(Element doc);
+	public	abstract int getItemReviews(Element doc);
+	public	abstract String getItemAnswered(Element doc);
+	public	abstract String getItemSeller(Element doc);
+	public	abstract String getItemSale(Element doc);
+	public	abstract String getItemsave(Element doc);
+	public	abstract String getItemShipping(Element doc);
+	public	abstract String getItemStock(Element doc);
+	public	abstract float getItemStar(Element doc);
+
+	public String getItemPrice(String itemID, Element doc) {
+		// TODO Auto-generated method stub
+		return getItemPrice(itemID);
+	}
+	public String getItemShipper(Element doc){
+		return null;
+	}
+
 }

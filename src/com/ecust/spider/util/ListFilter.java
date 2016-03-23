@@ -45,21 +45,29 @@ public class ListFilter {
 		
 	}
 	public static boolean UrlJudge(String url,int type){
+		if(url=="")
+			return false;
+		if(url.matches(".*footer.*"))
+			return false;
+		boolean flag=false;
 		switch(type){
 		case LIST:
-			pattern = Pattern.compile("^(http://list|https://list|list){1}[\\w\\.\\-/:]+");
+		    String reg=".*ref.*";
+		    flag=url.matches(reg);
 			break;
 		case ITEM:
-			pattern = Pattern.compile("^(http://item|https://item|item){1}[\\w\\.\\-/:]+");
+			 String reg1=".*ref.*";
+			 flag=url.matches(reg1);
 			break;
 		case product:
-			pattern=Pattern.compile("^(http://product|https://product|product){1}[\\w\\.\\-/:]+");
+			String reg2=".*ref.*";
+			 flag=url.matches(reg2);
 			break;
 		default :
 			pattern = null;
 			break;
 		}
-		return pattern.matcher(url).matches();
+		return flag;
 	}
 
 }
