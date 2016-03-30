@@ -43,13 +43,10 @@ public class DailyTask extends TimerTask {
 	}
 
 	private void addMapToQueue(String map) {
-		HashSet<String> mapqueue=JsoupUtil.praseArray(map);
-		HashSet<String> sencondqueue=new HashSet<>();
-		for(String url:mapqueue){
-			System.out.println(url);
-			sencondqueue.addAll(JsoupUtil.praseArray(url));
-		}
-		mapqueue.addAll(sencondqueue);
+		HashSet<String> mapqueue=new HashSet<>();
+		mapqueue.add("http://www.amazon.com/home-garden-kitchen-furniture-bedding/b/ref=sd_allcat_home_storefront?ie=UTF8&node=1055398");
+		mapqueue.add("http://www.amazon.com/b/ref=s9_acss_bw_ln_test_p?_encoding=UTF8&node=284507&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-leftnav&pf_rd_r=0R6F31FJG3RBRT2EP4BZ&pf_rd_t=101&pf_rd_p=2408420922&pf_rd_i=1055398");
+		//HashSet<String> mapqueue=JsoupUtil.praseArray(map);
 		//先要再遍历一遍map页面的链接
 		setmHashSet(mapqueue);
 		Value.totleNum += getmHashSet().size();

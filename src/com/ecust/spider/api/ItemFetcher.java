@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 
 import com.ecust.spider.Value;
 import com.ecust.spider.bean.model.*;
+import com.ecust.spider.task.SpiderExecuter;
 
 public abstract class ItemFetcher {
 	protected final static int MAX_TRY = 3;
@@ -32,7 +33,30 @@ public abstract class ItemFetcher {
 
 			doc = conn.timeout(200 * 1000).get();// 如果页面没有抓全，重新抓取
             itemID=getItemID(doc);
-            currentItem = new AmazonItem(getItemName(doc),host,getItemPrice(itemID,doc),
+            if(itemID==null||itemID.isEmpty()){
+            	ArrayList<String> cate=new ArrayList<>();
+            	cate=getItemCategory(doc);
+            	//检测是否存在分页
+            	if(ItemFetcher.isList(doc)){
+            		SpiderExecuter.addUrl(url);
+            		currentItem =null;
+            	}
+            	else if(isProduct(doc)){
+            		return null;
+            	}
+            	else if(cate.isEmpty()){
+            		currentItem =null;
+            	}
+            	
+            	else
+            		currentItem = new AmazonItem(getItemName(doc),host,getItemPrice(itemID,doc),
+            				cate,url,getItemImageUrl(doc),getItemDescription(doc),getItemDetail(doc),
+                    		getItemReviews(doc),getItemAnswered(doc),getItemSeller(doc),getItemSale(doc),
+                    		getItemsave(doc),getItemStar(doc),getItemShipping(doc),getItemStock(doc),getItemShipper(doc)
+            				);
+            }
+            else
+            	currentItem = new AmazonItem(getItemName(doc),host,getItemPrice(itemID,doc),
             		getItemCategory(doc),url,getItemImageUrl(doc),getItemDescription(doc),getItemDetail(doc),
             		getItemReviews(doc),getItemAnswered(doc),getItemSeller(doc),getItemSale(doc),
             		getItemsave(doc),getItemStar(doc),getItemShipping(doc),getItemStock(doc),getItemShipper(doc)
@@ -57,6 +81,27 @@ public abstract class ItemFetcher {
 		return currentItem;
 	}
 
+	public static boolean isProduct(Document doc){
+		String[] selector={"#olpDetailPageLink"};
+		String mark=null;
+		for(String s:selector){
+			mark=doc.select(s).text();
+			if(!mark.isEmpty())
+				return false;
+		}
+		return true;
+	}
+	public static boolean isList(Document doc){
+		String num=doc.select("div#pagn").select("span.pagnDisabled").text();
+		try{
+			if(!num.isEmpty())
+				return true;
+		}
+		catch(Exception e){
+			return false;
+		}
+		return false;
+	}
 	public abstract String getItemName(Element doc);
 
 	public abstract String getItemImageUrl(Element doc);

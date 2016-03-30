@@ -92,7 +92,8 @@ public class JsoupUtil {
 //		
 		HashSet<String> mQueue = new HashSet<String>();
 		Document doc = Getdoc(url,3);
-		String[] containClass={"div#container","div.a-container","div.fsdContainer","div.fsdDeptBox","div.bxc-grid__container","div.acs-tiles-wrap","div.unified_widget"};
+//		System.out.println(doc);
+		String[] containClass={"div.acs-tiles-wrap","div.nav__container","div.fsdDeptCol","div.a-container","div.fsdContainer","div.fsdDeptBox","div.a-section","div.bxc-grid__container","div.acs-tiles-wrap","div.unified_widget","div#container"};
 		Elements lists = null;
 		for(String str:containClass){
 			lists = doc.select(str);

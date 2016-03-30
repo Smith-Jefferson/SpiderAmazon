@@ -22,7 +22,7 @@ public class SqlUtil {
 		setPassword(password);
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://175.185.8.9:3306/" + dbName;
+			String url = "jdbc:mysql://localhost:3306/" + dbName;
 			Connection conn = DriverManager.getConnection(url, userName, password);
 			stmt = conn.createStatement();
 		} catch (Exception e) {

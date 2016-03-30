@@ -1,10 +1,14 @@
 package com.ecust.spider.test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.ecust.spider.Constants;
 import com.ecust.spider.Value;
 import com.ecust.spider.bean.model.Item;
 import com.ecust.spider.fetcher.listFetcher.AmazonListFetcher;
 import com.ecust.spider.task.DailyTask;
+import com.ecust.spider.task.SpiderExecuter;
 import com.ecust.spider.util.ItemFetcherFactory;
 import com.ecust.spider.util.JsoupUtil;
 
@@ -19,15 +23,21 @@ public class TestMain {
 			Value.getmSqlUtil().deleteAll(Constants.YHD_TABLE);
 		}*/
 //		DailyTask.setmHashSet(JsoupUtil.praseArray(Constants.Amazon_MAP_URL));
-//		Value.totleNum += DailyTask.getmHashSet().size();
-//		Value.addQueue(DailyTask.getmHashSet());
+		HashSet<String> testset=new HashSet<>();
+		testset.add("http://www.amazon.com/home-garden-kitchen-furniture-bedding/b/ref=sd_allcat_home_storefront?ie=UTF8&node=1055398");
+		DailyTask.setmHashSet(testset);
+		Value.totleNum += DailyTask.getmHashSet().size();
+		Value.addQueue(DailyTask.getmHashSet());
+		new Thread(new SpiderExecuter() {
+		}) {
+		}.start();
 //		
 //		AmazonListFetcher listFetcher=new AmazonListFetcher();
 //		for(String url:Value.totalQueue){
 //			listFetcher.ExcuteList(url);
 //		}
-		Item item = ItemFetcherFactory.getItemFetcher(Constants.Amazon)
-				.getItemInfo("http://www.amazon.com/Guess-V-Neck-Ruched-Halter-Fitted/dp/B01CO42JBM/ref=sr_1_790/191-9055729-8542763?s=apparel&ie=UTF8&qid=1458636789&sr=1-790&nodeID=1040660&refinements=p_89%3AGuess");
+//		Item item = ItemFetcherFactory.getItemFetcher(Constants.Amazon)
+//				.getItemInfo("http://www.amazon.com/Vichy-Thermale-Sensitive-Paraben-Free-Alcohol-Free/dp/B000V3ME6Y/ref=lp_12630928011_1_24_s_it/181-1214557-2236551?s=luxury-beauty&ie=UTF8&qid=1459030472&sr=1-24");
 //		new Thread(new Runnable()
 //		{
 //

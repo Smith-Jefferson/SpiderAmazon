@@ -67,6 +67,9 @@ public class ListFilter {
 			pattern = null;
 			break;
 		}
+//		if(flag==true){
+//			flag=!BloomFilter.ifNotContainsSet(url);
+//		}
 		return flag;
 	}
 

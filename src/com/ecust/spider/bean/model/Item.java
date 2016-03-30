@@ -22,16 +22,18 @@ public class Item {
 	
 	public Item(String name,String host,String price,	//完整构造器
 			ArrayList<String> catgory,String url,String imageUrl,String description){
+	
+//		for(int i = 0;i<catgory.size();i++){
+//			catgory.set(i, catgory.get(i));
+//		}
 		setName(removeQuo(name));
-		setHost(host);
 		setPrice(price);
 		setUrl(url);
 		setImageUrl(imageUrl);
 		setDescription(removeQuo(description));
-//		for(int i = 0;i<catgory.size();i++){
-//			catgory.set(i, catgory.get(i));
-//		}
+		setHost(host);
 		adaptCatgory(catgory);
+		
 	}
 	
 	@Override
@@ -53,30 +55,33 @@ public class Item {
 			System.out.println("分类信息为空!");
 			break;
 		case 1:
-			setCatFirst(Catgory.get(0));
+			setCatFirst(removeQuo(Catgory.get(0)));
 			break;
 		case 2:
-			setCatFirst(Catgory.get(0));
-			setCatSecond(Catgory.get(1));
+			setCatFirst(removeQuo(Catgory.get(0)));
+			setCatSecond(removeQuo(Catgory.get(1)));
 			break;
 		case 3:
-			setCatFirst(Catgory.get(0));
-			setCatSecond(Catgory.get(1));
-			setCatThird(Catgory.get(2));
+			setCatFirst(removeQuo(Catgory.get(0)));
+			setCatSecond(removeQuo(Catgory.get(1)));
+			setCatThird(removeQuo(Catgory.get(2)));
 			break;
 		default:
-			setCatFirst(Catgory.get(0));
-			setCatSecond(Catgory.get(1));
-			setCatThird(Catgory.get(2));
+			setCatFirst(removeQuo(Catgory.get(0)));
+			setCatSecond(removeQuo(Catgory.get(1)));
+			setCatThird(removeQuo(Catgory.get(2)));
 			break;
 		}
-		setBrand(Catgory.get(Catgory.size()-1));
+		setBrand(removeQuo(Catgory.get(Catgory.size()-1)));
 	}
 
 	protected String removeQuo(String str){
-		String rep = new String (str);
-		rep = rep.replace("'", "’");
-		return rep;
+		if(str!=null &&!str.isEmpty()){
+			String rep = new String (str);
+			rep = rep.replace("'", "’");
+			return rep;
+		}
+		return null;
 	}
 	
 	public String getName() {

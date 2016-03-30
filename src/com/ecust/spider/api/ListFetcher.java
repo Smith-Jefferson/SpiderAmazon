@@ -22,13 +22,13 @@ import com.ecust.spider.util.ListFilter;
 
 public abstract class ListFetcher {
 	protected static final int MAX_TRY = 3;
+
 	protected String table = "";
 	public abstract void ExcuteList(String oneListUrl);
 
 	public abstract String GetNextPage(String nextPageUrl, String page,
 			int currentI);
 	public abstract int GetMaxNum(Element doc);
-
 	protected void excuteGeneralList(String oneListUrl, String[] Listclass,
 			Map<String, String> pageClass, int type, int length) {
 		switch (type) {
@@ -63,6 +63,7 @@ public abstract class ListFetcher {
 							pageClass, removeString);
 					Urlend = Integer.parseInt(nextMap.entrySet().iterator().next()
 							.getKey().text().trim());
+					
 					int urlmax=GetMaxNum(doc);
 					if(Urlend<urlmax)
 						Urlend=urlmax;
@@ -88,7 +89,7 @@ public abstract class ListFetcher {
 							// System.out.println(url);
 							Item item = ItemFetcherFactory.getItemFetcher(type)
 									.getItemInfo(url);
-							if (item == null) {
+							if (item == null || (item.getName()==null && item.getImageUrl()==null)) {
 								continue;
 							}
 							try {
@@ -234,6 +235,10 @@ public abstract class ListFetcher {
 			}
 			if (links == null || links.isEmpty()) {
 				links = doc.select("a[href]");
+				if(links == null || links.isEmpty()) {
+					Thread.currentThread();
+					Thread.sleep(Constants.sleepTime);
+				}
 				System.out.println("当前页面" + url + "获取不全");
 			}
 			else{

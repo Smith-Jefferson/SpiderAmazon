@@ -14,13 +14,17 @@ public class Constants {
 	public static final String SN_TABLE = "SNitems";
 	//................................
 	public static final String DB_USER_NAME = "root";
-	public static final String DB_USER_PASS = "";
+	public static final String DB_USER_PASS = "root";
 	public static final int THREAD_SIZE = 90;
-	public static final int THREAD_NUM = 5;
+	public static final int THREAD_NUM = 10;
 	public static final int JD = 0;
 	public static final int YHD = 1;
 	public static final int SN = 2;
 	public static final int Amazon = 3;
 	public static final String JD_BLOOM = "<>";
 	public static final String YHD_BLOOM = "<>";
+	
+	//设置线程睡眠时间
+	public static final long sleepTime = 1000*60*30L;
+
 }
