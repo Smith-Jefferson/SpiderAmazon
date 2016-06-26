@@ -15,7 +15,6 @@ import ecust.model.searchProductDetail;
 import ecust.tool.BloomFilter;
 
 public class TrendAmazonDataOp  implements SaveData{
-	//private static Connection conn;
 	private static int num=1;
 	private static int status;
 	public static List<String> getKeyWords() throws SQLException{
@@ -125,11 +124,12 @@ public class TrendAmazonDataOp  implements SaveData{
 		}
 	}
 	
-	public static void save(Product product,String table) throws SQLException{
+	public  void save(Product product,String table) throws SQLException{
 		searchProduct product1=(searchProduct)product;
 		Connection conn=null;
 		PreparedStatement pstmt = null;
-		if(!BloomFilter.ifNotContainsSet(product1.getAsin())){
+		BloomFilter bloomFilter=new BloomFilter();
+		if(!bloomFilter.ifNotContainsSet(product1.getAsin())){
 			String query="INSERT INTO "
 					+ table
 					+ "(Iname,Iurl,Iimg_url,Iprice,asin,sellers,Icategory,rank)"
@@ -142,9 +142,9 @@ public class TrendAmazonDataOp  implements SaveData{
 				pstmt = conn.prepareStatement(query);
 				status=pstmt.executeUpdate();
 				if(status==1){
-					System.out.println("第"+(num++)+"个产品"+product+"已入库");
+					System.out.println(Thread.currentThread().getName()+"第"+(num++)+"个产品"+product+"已入库");
 				}else{
-					System.out.println("个产品"+product+"入库失败");
+					System.out.println(Thread.currentThread().getName()+":产品"+product+"入库失败");
 				}
 				
 			} catch (SQLException e) {
@@ -158,16 +158,16 @@ public class TrendAmazonDataOp  implements SaveData{
 		}
 		
 	}
-	public static void updateRankByAsin(int rank,String asin) throws SQLException{
+	public  void updateRankByAsin(double price,int rank,String asin) throws SQLException{
 		asin=asin.replace("\"", "");
 		Connection conn=null;
 		PreparedStatement pstmt =null;	
-		String update="update trendsamazon SET rank="+rank+" where asin=\""+asin+"\"";
+		String update="update trendsamazon SET rank="+rank+",Iprice="+price+" where asin=\""+asin+"\"";
 		try{
 			 conn=ConnectPool.instance().getConnection();
 			pstmt = conn.prepareStatement(update);
 			pstmt.executeUpdate();
-			System.out.println("更新商品"+asin+"排名成功");
+			System.out.println(Thread.currentThread().getName()+"更新商品"+asin+"排名成功");
 		}finally{
 			ConnectPool.freeConnection(conn);
 		}
@@ -194,7 +194,27 @@ public class TrendAmazonDataOp  implements SaveData{
 			SqlUtil.free(set,pstmt,conn);
 		}
 	}
-	public static void saveDetail(searchProductDetail detail) throws SQLException{
+	public static List<String>  getUrlNoRank() throws SQLException{
+		String query="SELECT Iurl from trendsamazon where rank = 0 ";
+		Connection conn=null;
+		PreparedStatement pstmt = null;
+		ResultSet set= null;
+		
+		try{
+			conn=ConnectPool.instance().getConnection();
+			pstmt = conn.prepareStatement(query);
+			set= pstmt.executeQuery();	
+			List<String> urllist= new ArrayList<String>(set.getRow());
+			while(set.next()){
+				urllist.add(set.getString("Iurl"));
+			}
+			return urllist;
+		}
+		finally{
+			SqlUtil.free(set,pstmt,conn);
+		}
+	}
+	public  void saveDetail(searchProductDetail detail) throws SQLException{
 		
 		PreparedStatement pstmt = null;
 		Connection conn=null;
@@ -212,11 +232,12 @@ public class TrendAmazonDataOp  implements SaveData{
 		String asinTime=detail.getAsin()+detail.getInserttime();
 		try{
 			conn=ConnectPool.instance().getConnection();	
-			if(!BloomFilter.ifNotContainsSet(asinTime)){
+			BloomFilter bloomFilter=new BloomFilter();
+			if(!bloomFilter.ifNotContainsSet(asinTime)){
 				pstmt = conn.prepareStatement(query);
 				status=pstmt.executeUpdate();
 				if(status==1){
-					System.out.println(detail+"成功");
+					System.out.println(Thread.currentThread().getName()+":"+detail+"成功");
 				}else{
 					System.out.println(detail+"失败");
 				}

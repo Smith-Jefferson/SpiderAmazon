@@ -63,9 +63,11 @@ public class TrendsAmazonItemDetial implements Runnable {
 		this.end = end;
 	}
 	public  void getDetail(String url){
+		BloomFilter bloomFilter=new BloomFilter();
 		SpiderTool tool=new SpiderTool();
+		TrendAmazonDataOp dataOp=new TrendAmazonDataOp();
 		try {
-			Document doc=tool.Getdoc(url,1);
+			Document doc=tool.Getdoc(url,2);
 			TrendsAmazonItemDetial detail=new TrendsAmazonItemDetial();
 			 String asin=detail.getAsin(doc);
 			 if(asin==null||asin.isEmpty())
@@ -79,8 +81,8 @@ public class TrendsAmazonItemDetial implements Runnable {
 			 double good_review_up_down=detail.getReview_up_down(doc);
 			 List<Integer> rank=detail.getRank(doc);
 			 List<Double> price=detail.getPrice(doc);
-			 List<Integer> star4=detail.getStar4(doc);
-			 List<Integer> star5=detail.getStar5(doc);
+			 List<Float> star4=detail.getStar4(doc);
+			 List<Float> star5=detail.getStar5(doc);
 			 List<Integer> sellers=detail.getSellers(doc);
 			 List<Integer> review=detail.getReview(doc);
 			 List<Long> times=detail.getTime(doc);
@@ -104,11 +106,11 @@ public class TrendsAmazonItemDetial implements Runnable {
 						 pdetail.setRanks(rank.get(i));
 					 if(times!=null&&i<times.size())
 						 pdetail.setInserttime(times.get(i));
-					 TrendAmazonDataOp.saveDetail(pdetail);
+					 dataOp.saveDetail(pdetail);
 				 }
 			 }
 			
-			 if(!BloomFilter.contains(url)){
+			 if(!bloomFilter.contains(url)){
 				 String iname=getName(doc);
 				 String iimage=getIimage(doc);
 				 double iprice=getIprice(doc);
@@ -118,10 +120,10 @@ public class TrendsAmazonItemDetial implements Runnable {
 				 searchProduct product=new searchProduct(iname,  iimage,  asin,  iprice,  seller,  iurl,icategory);
 				 if(rank!=null)
 					 product.setRank(rank.get(rank.size()-1));	
-				 TrendAmazonDataOp.save(product, "trendsamazon");
+				 dataOp.save(product, "trendsamazon");
 			 }else{
-				 if(rank!=null)
-					 TrendAmazonDataOp.updateRankByAsin(rank.get(rank.size()-1),asin);
+				 if(rank!=null&&price!=null)
+					 dataOp.updateRankByAsin(price.get(price.size()-1),rank.get(rank.size()-1),asin);
 			 }
 		} catch (Exception e) {
 			
@@ -143,7 +145,7 @@ public class TrendsAmazonItemDetial implements Runnable {
 		String name=doc.select(".view-content").text();
 		String[] temp=name.split("best");
 		name=temp[0];
-		return name;
+		return name.replace("'", "");
 	}
 	public static String getIimage(Document ele) {
 		String name=ele.select("div.image").select("img[src]").attr("src");
@@ -284,6 +286,8 @@ public static String getIurl(Document ele) {
 		try{
 			String name=doc.data();
 			String ranks=getAttrValInLine(name,"rank");
+			if(ranks==null ||ranks.isEmpty())
+				return null;
 			String[] ranktr=ranks.split(",");
 			ranklist=new ArrayList<>(ranktr.length);
 			for(String R:ranktr){
@@ -406,8 +410,8 @@ public static String getIurl(Document ele) {
 		
 		return ranklist;
 	}
-	public List<Integer> getStar4(Document doc){
-		List<Integer> ranklist=null;
+	public List<Float> getStar4(Document doc){
+		List<Float> ranklist=null;
 		try{
 			String name=doc.data();
 			String ranks=getAttrValInLine(name,"4star");
@@ -417,7 +421,7 @@ public static String getIurl(Document ele) {
 				R=R.trim();
 				if(R.isEmpty())
 					continue;
-				ranklist.add(Integer.parseInt(R));
+				ranklist.add(Float.parseFloat(R));
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -425,8 +429,8 @@ public static String getIurl(Document ele) {
 		
 		return ranklist;
 	}
-	public List<Integer> getStar5(Document doc){
-		List<Integer> ranklist=null;
+	public List<Float> getStar5(Document doc){
+		List<Float> ranklist=null;
 		try{
 			String name=doc.data();
 			String ranks=getAttrValInLine(name,"5star");
@@ -436,7 +440,7 @@ public static String getIurl(Document ele) {
 				R=R.trim();
 				if(R.isEmpty())
 					continue;
-				ranklist.add(Integer.parseInt(R));
+				ranklist.add(Float.parseFloat(R));
 			}
 		}catch(Exception e){
 			e.printStackTrace();

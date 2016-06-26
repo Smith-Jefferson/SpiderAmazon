@@ -18,6 +18,7 @@ import ecust.tool.JsoupLogin;
 
 public class MainTask {
 
+	private static BloomFilter bloomFilter=new BloomFilter();
 	public static void main(String[] args) throws Exception{
 		JsoupLogin logintool=new JsoupLogin();
 		logintool.login("xyg177@qq.com ", "1983321");
@@ -33,7 +34,7 @@ public class MainTask {
 	    int start=1;
 
 	    int end=num;
-	    int threadNum=500;
+	    int threadNum=20;
 //	    TrendsAmazonItemDetial TDetial=new TrendsAmazonItemDetial();
 //    	TDetial.setStart(start);
 //    	TDetial.setEnd(end);
@@ -68,7 +69,7 @@ public class MainTask {
 		queryQueue.add("bedding");
 		for(int i=0;i<queryQueue.size();i++){
 			String keyword=queryQueue.get(i);
-			if(!BloomFilter.ifNotContainsSet(keyword)){
+			if(!bloomFilter.ifNotContainsSet(keyword)){
 				List<Product> produts=itemList.getItemList(url, keyword, data);
 				SaveTrendsAmazon saveAmazon=new SaveTrendsAmazon();
 				saveAmazon.setProducts(produts);
@@ -84,7 +85,7 @@ public class MainTask {
 				e.printStackTrace();
 			}
 			for(String keyword1:keywords){
-				if(!BloomFilter.contains(keyword1)){
+				if(!bloomFilter.contains(keyword1)){
 					queryQueue.add(keyword1);
 				}
 			}
@@ -97,7 +98,9 @@ public class MainTask {
 			List<String> asinList=TrendAmazonDataOp.getAsin();
 			for(String asin:asinList){
 				//			System.out.println(asin);
-				BloomFilter.add(asin);
+				if(asin==null)
+					continue;
+				bloomFilter.add(asin);
 			}
 		} catch (SQLException e) {
 			
@@ -112,7 +115,9 @@ public class MainTask {
 			System.out.println("当前系统中共有数据"+urlList.size()+"条");
 			for(String url:urlList){
 				//			System.out.println(asin);
-				BloomFilter.add(url);
+				if(url==null)
+					continue;
+				bloomFilter.add(url);
 			}
 			System.out.println("初始化系统完成");
 		} catch (SQLException e) {
@@ -127,7 +132,9 @@ public class MainTask {
 			List<String> asinList=TrendAmazonDataOp.getAsinTime();
 			System.out.println("当前系统中共有数据详情"+asinList.size()+"条");
 			for(String asintime:asinList){
-				BloomFilter.add(asintime);
+				if(asintime==null)
+					continue;
+				bloomFilter.add(asintime);
 			}
 			System.out.println("初始化系统完成");
 		} catch (SQLException e) {

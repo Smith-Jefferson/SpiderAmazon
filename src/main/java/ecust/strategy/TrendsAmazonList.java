@@ -41,7 +41,7 @@ public class TrendsAmazonList implements ItemList {
 	}
 	public static List<Product> getItemList(String url) throws IOException{
 		SpiderTool tool=new SpiderTool();
-		Document doc=tool.Getdoc(url,1);
+		Document doc=tool.Getdoc(url,2);
 		Elements items=doc.select("ul.list-results>li");
 		Item item=new TrendsAmazonItem();
 		List<Product> itemList=new ArrayList<>();

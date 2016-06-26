@@ -23,10 +23,13 @@ public class SpiderTool {
 		Document doc=null ;
 		Connection conn=login.getCon();
 		if(!login.LoginStatus)  {
-			conn.url("http://us.trendsamazon.com/login");
-			conn.ignoreContentType(true).method(Method.POST).data(login.getData()).cookies(login.getCookies()).execute();
-			login.LoginStatus=true;
-			System.out.println("通过验证");
+			synchronized (SpiderTool.class) {
+				conn.url("http://us.trendsamazon.com/login");
+				conn.ignoreContentType(true).method(Method.POST).data(login.getData()).cookies(login.getCookies()).execute();
+				login.LoginStatus=true;
+				System.out.println("通过验证");
+			}
+			
 		} 
 		int mTryTime = --tryTime;
 
@@ -36,7 +39,7 @@ public class SpiderTool {
 			Response rse= conn.ignoreContentType(true).method(Method.POST).execute();//获取响应
 			doc = Jsoup.parse(rse.body());//转换为Dom树
 			if (doc == null && tryTime >= 0) {
-				System.out.println("解析list：" + oneListUrl + "的 DOC 时出错！剩余尝试次数："
+				System.out.println("解析product：" + oneListUrl + "的 DOC 时出错！剩余尝试次数："
 						+ tryTime);
 				return Getdoc(oneListUrl, mTryTime);
 			} else if (isLogin(doc)) {
@@ -46,11 +49,11 @@ public class SpiderTool {
 			}
 		} catch (Exception e) {
 			if (tryTime >= 0) {
-				System.out.println("解析list：" + oneListUrl + "的时出错！剩余尝试次数："
+				System.out.println("解析product：" + oneListUrl + "的时出错！剩余尝试次数："
 						+ tryTime);
 				return Getdoc(oneListUrl, mTryTime);
 			} else {
-				System.out.println("解析list：" + oneListUrl + "时出错！");
+				System.out.println("解析product：" + oneListUrl + "时出错！");
 				e.printStackTrace();
 			}
 		}finally{
